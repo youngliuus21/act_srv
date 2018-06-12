@@ -16,8 +16,8 @@ def connect(sid, environ):
 
 @sio.on('dialog.act', namespace='/action')
 async def message(sid, data):
-    print("message ", data)
-    await sio.emit('reply', room=sid)
+    print("message ", data['action'], sid)
+    await sio.emit('act.status', data={'text':'from act server, :'+data['action']}, room=sid)
 
 @sio.on('disconnect', namespace='/action')
 def disconnect(sid):

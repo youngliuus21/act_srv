@@ -1,5 +1,6 @@
 from aiohttp import web
 import socketio
+import importlib
 
 sio = socketio.AsyncServer()
 app = web.Application()
@@ -17,10 +18,17 @@ def connect(sid, environ):
 @sio.on('dialog.act', namespace='/action')
 async def message(sid, data):
     print("action name: ", data['name'], sid)
-    ac1 = sio.emit('act.status', data={'text':'action status:'+data['name']}, room=sid, namespace='/action')
-    ac2 = sio.emit('act.status', data={'result':'ok', 'done':True}, room=sid, namespace='/action')
+    
+    ac1 = sio.emit('act.status', data={'text':'action begin:'+data['name']}, room=sid, namespace='/action')
+    """ac2 = sio.emit('act.status', data={'result':'ok', 'done':True}, room=sid, namespace='/action')"""
+    async def callback(res):
+        await sio.emit('act.status', data=res, room=sid, namespace='/action')
+        
     await ac1
-    await ac2
+    module = importlib.import_module(data['name'].lower())
+    """in case I changed the module"""
+    module = importlib.reload(module)
+    await module.perform(data, callback)
 
 @sio.on('disconnect', namespace='/action')
 def disconnect(sid):

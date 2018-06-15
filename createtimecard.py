@@ -66,8 +66,8 @@ async def CreateTimeCard(data, callback):
             FillForm1(driver)
             c4 = callback({'text':'FillForm done.'})
             
-            randfile = 'static/' + id_generator() +'.png'
-            TakeScreenShot(driver, randfile)
+            randfile = id_generator() +'.png'
+            TakeScreenShot(driver, 'static/' + randfile)
             c5 = callback({'text':'Job done.','screen':randfile})
             await c1
             await c2

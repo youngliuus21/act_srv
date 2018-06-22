@@ -17,14 +17,14 @@ class MyDriver:
     def __exit__(self, type, value, traceback):
         self.driver.close()
 
-def Login(driver):
+def Login(driver, sso):
     #login
     driver.get("https://global-ebusiness.oraclecorp.com/OA_HTML/AppsLogin")
     #with open('C:\\Users\\yanliu\\Documents\\test2.txt') as f:
     #    ps = f.read()
     ele_username = driver.find_element_by_name('ssousername')
-    ele_username.send_keys(name)
-    driver.find_element_by_name('password').send_keys(ps)
+    ele_username.send_keys(sso['username'])
+    driver.find_element_by_name('password').send_keys(sso['password'])
 
     driver.find_element_by_class_name('submit_btn').click()
     
@@ -38,8 +38,8 @@ def FillForm1(driver):
     from selenium.webdriver.support.ui import Select
     select = Select(driver.find_element_by_name('A221N1'))
     select.select_by_visible_text('Vacation in Days')
-    driver.find_element_by_name('B21_1_4').send_keys('1')
-    driver.find_element_by_name('B21_1_5').send_keys('1')
+    #driver.find_element_by_name('B21_1_4').send_keys('1')
+    #driver.find_element_by_name('B21_1_5').send_keys('1')
     driver.find_element_by_name('B21_1_6').send_keys('1')
     driver.find_element_by_id('review_uixr').click()
 
@@ -53,34 +53,24 @@ def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
 async def CreateTimeCard(data, callback):
-    print('test0.1')
     with MyDriver() as driver:
         try:
-            
-            print('test1')
-            c1 = callback({'text':'Start Create Time Card'})
-            Login(driver)
-            c2 = callback({"text":'Login done.'})
+            print('Start Create Time Card')
+            Login(driver, sso=data['sso'])
+            await callback({"text":'Login done.'})
             Nav1(driver)
-            c3 = callback({'text':'Nav done.'})
+            await callback({'text':'Nav done.'})
             FillForm1(driver)
-            c4 = callback({'text':'FillForm done.'})
+            await callback({'text':'Fill Form done.'})
             
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            c5 = callback({'text':'Job done.','screen':randfile})
-            await c1
-            await c2
-            await c3
-            await c4
-            await c5
+            await callback({'text':'Job done.','screen':randfile})
+
         except Exception as e:
             await callback({'text':'Error:'+str(e)})
 
 async def perform(data, callback):
-    params = data['parameters']
-    #c1 = callback({'status':True, 'text':'Module Action Status, begin_date:'+params['begin_date']+', end_date:'+params['end_date']})
-    #c2 = callback({'result':'ok', 'done':True})
     await CreateTimeCard(data, callback)
     
 if __name__ == "__main__":

@@ -89,4 +89,6 @@ async def POCBugCheck(data, callback):
             await callback({'text':'Error:'+str(e)})
             
 async def perform(data, callback):
-    await POCBugCheck(data['parameters'], callback)
+    param = data['parameters']
+    param.sso = data['sso']
+    await POCBugCheck(, callback)

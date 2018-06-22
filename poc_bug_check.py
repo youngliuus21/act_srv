@@ -91,4 +91,4 @@ async def POCBugCheck(data, callback):
 async def perform(data, callback):
     param = data['parameters']
     param.sso = data['sso']
-    await POCBugCheck(, callback)
+    await POCBugCheck(param, callback)

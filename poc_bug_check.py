@@ -78,7 +78,7 @@ async def POCBugCheck(data, callback):
     with MyDriver() as driver:
         try:
             await callback({"text":'Login'})
-            Login(driver, data['bug_num'], sso=data['sso'])
+            Login(driver, data['bug_number'], sso=data['sso'])
             await callback({"text":'RetrieveInfo'})
             res_num, report_rel, bug_subject = RetrieveInfo(driver)
             await callback({"text":'CheckInfo'})
@@ -89,4 +89,4 @@ async def POCBugCheck(data, callback):
             await callback({'text':'Error:'+str(e)})
             
 async def perform(data, callback):
-    await POCBugCheck(data, callback)
+    await POCBugCheck(data['parameters'], callback)

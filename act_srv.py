@@ -19,16 +19,15 @@ def connect(sid, environ):
 async def message(sid, data):
     print("action name: ", data['name'], sid)
     
-    ac1 = sio.emit('act.status', data={'text':'action begin:'+data['name']}, room=sid, namespace='/action')
+    await sio.emit('act.status', data={'text':'action begin:'+data['name']}, room=sid, namespace='/action')
     async def callback(res):
         await sio.emit('act.status', data=res, room=sid, namespace='/action')
-        
-    await ac1
+
     module = importlib.import_module(data['name'].lower())
     """in case I changed the module"""
     module = importlib.reload(module)
     await module.perform(data, callback)
-    await sio.emit('act.status', data={'result':'ok', 'done':True}, room=sid, namespace='/action')
+    await sio.emit('act.status', data={'result':'ok', 'close':True}, room=sid, namespace='/action')
 
 @sio.on('disconnect', namespace='/action')
 def disconnect(sid):

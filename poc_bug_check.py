@@ -86,7 +86,7 @@ async def POCBugCheck(data, callback):
             res['done'] = True
             await callback(res)
         except Exception as e:
-            await callback({'text':'Error:'+str(e)})
+            await callback({'res':False, 'done':True, 'text':'Error:'+str(e)})
             
 async def perform(data, callback):
     param = data['parameters']

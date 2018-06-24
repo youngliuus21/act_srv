@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 import string
 import random
+from datetime import date
 
 class MyDriver:
     def  __enter__(self):
@@ -117,6 +118,10 @@ def Confirm(driver):
     alert = driver.switch_to_alert()
     alert.accept()
     
+def WaitBeforeLastScreen(driver):
+	driver.switch_to.default_content()
+	driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
+	WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
 def TakeScreenShot(driver, filename):
     #take screen shot
     driver.save_screenshot(filename)
@@ -133,18 +138,19 @@ async def UploadPOC(data, callback):
             await callback({"text":'GoUploadPage'})
             GoUploadPage(driver)
             await callback({"text":'FillUploadSelectionForm'})
-            FillUploadSelectionForm(driver, bug_num=data['bug_num'], rel=data['rel'])
+            FillUploadSelectionForm(driver, bug_num=data['bug_num'], rel=data['report_rel'])
             await callback({"text":'FillUploadMetaForm'})
-            FillUploadMetaForm(driver, abs_txt=data['abs_txt'], date_value=data['date_value'])
+			date_str = date.today().strftime("%b-%d-%y 00:00:00").upper()
+            FillUploadMetaForm(driver, abs_txt=data['abs_txt'], date_value=date_str)
             await callback({"text":"UploadLocationForm"})
-            UploadLocationForm(driver, data['file_path'])
+            UploadLocationForm(driver, data['filename'])
             await callback({"text":"FileContent"})
             FileContent(driver)
             await callback({"text":"SummaryForm"})
             SummaryForm(driver)
             await callback({"text":"Confirm"})
             Confirm(driver)
-            
+            WaitBeforeLastScreen(driver)
             randfile = 'static/' + id_generator() +'.png'
             TakeScreenShot(driver, randfile)
             await callback({'text':'Job done.','screen':randfile})

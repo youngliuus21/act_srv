@@ -157,4 +157,4 @@ async def perform(data, callback):
     param = data['parameters']['bug_info']
     param['bug_num'] = data['parameters']['bug_number']
     param['sso'] = data['sso']
-    await POCBugCheck(param, callback)
+    await UploadPOC(param, callback)

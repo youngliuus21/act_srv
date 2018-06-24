@@ -22,15 +22,15 @@ class MyDriver:
     def __exit__(self, type, value, traceback):
         self.driver.close()
         
-def Login(driver):
+def Login(driver, sso):
     #login
     with open('C:\\Users\\yanliu\\Documents\\test2.txt') as f:
         ps = f.read()
     driver.get("http://aru.us.oracle.com:8080/ARU/Login/get_form?navigation=button")
     
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'ssousername')))
-    driver.find_element_by_name('ssousername').send_keys('young.liu@oracle.com')
-    driver.find_element_by_name('password').send_keys(ps)
+    driver.find_element_by_name('ssousername').send_keys(sso['username'])
+    driver.find_element_by_name('password').send_keys(sso['password'])
 
     driver.find_element_by_class_name('submit_btn').click()
 
@@ -120,7 +120,7 @@ def Confirm(driver):
 def TakeScreenShot(driver, filename):
     #take screen shot
     driver.save_screenshot(filename)
-	
+    
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
@@ -129,7 +129,7 @@ async def UploadPOC(data, callback):
         try:
             await callback({'text':'Start Upload POC'})
             await callback({"text":'Login'})
-            Login(driver)
+            Login(driver, data['sso'])
             await callback({"text":'GoUploadPage'})
             GoUploadPage(driver)
             await callback({"text":'FillUploadSelectionForm'})
@@ -151,10 +151,10 @@ async def UploadPOC(data, callback):
         except Exception as e:
             randfile = 'static/' + id_generator() +'.png'
             TakeScreenShot(driver, randfile)
-			await callback({'text':'Job Error:'+str(e),'screen':randfile})
-			
+            await callback({'text':'Job Error:'+str(e),'screen':randfile})
+            
 async def perform(data, callback):
     param = data['parameters']['bug_info']
-	param['bug_num'] = data['parameters']['bug_number']
+    param['bug_num'] = data['parameters']['bug_number']
     param['sso'] = data['sso']
     await POCBugCheck(param, callback)

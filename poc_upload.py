@@ -7,6 +7,9 @@ from selenium.webdriver.support.ui import Select
 import string
 import random
 from datetime import date
+import os.path
+import traceback
+import time
 
 class MyDriver:
     def  __enter__(self):
@@ -17,6 +20,7 @@ class MyDriver:
         driver = webdriver.Remote("http://slc12gzh.us.oracle.com:8444", 
                           browser_profile=ff_profile,
                           desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
+        driver._is_remote = False #workaround, see https://stackoverflow.com/questions/42754877/cant-upload-file-using-selenium-with-python-post-post-session-b90ee4c1-ef51-4/42770761#42770761
         driver.implicitly_wait(20) # seconds
         self.driver = driver
         return self.driver
@@ -82,15 +86,17 @@ def FillUploadMetaForm(driver, abs_txt, date_value):
     driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppNavigate']"))
     driver.find_element_by_id('btn_Continue').click()
     
-def UploadLocationForm(driver, file_path):
+def UploadLocationForm(driver, filename):
     #Upload Location Form
     driver.switch_to.default_content()
     driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
 
-    driver.find_element_by_name('xferfile').send_keys(file_path)  #local file only
+    WebDriverWait(driver, 20).until(EC.visibility_of_element_located((By.NAME, 'xferfile')))
+    driver.find_element_by_name('xferfile').send_keys(filename)  #local file only
     driver.switch_to.default_content()
     driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppNavigate']"))
     driver.find_element_by_id('btn_Continue').click()
+    print('click on continue')
 
 def FileContent(driver):
     #file content may wrong
@@ -121,7 +127,8 @@ def Confirm(driver):
 def WaitBeforeLastScreen(driver):
 	driver.switch_to.default_content()
 	driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
-	WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
+	#WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
+    time.sleep(5)
 def TakeScreenShot(driver, filename):
     #take screen shot
     driver.save_screenshot(filename)
@@ -143,7 +150,9 @@ async def UploadPOC(data, callback):
             date_str = date.today().strftime("%b-%d-%Y 00:00:00").upper()
             FillUploadMetaForm(driver, abs_txt=data['abs_txt'], date_value=date_str)
             await callback({"text":"UploadLocationForm"})
-            UploadLocationForm(driver, data['filename'])
+            
+            filename = data['filename']
+            UploadLocationForm(driver, filename)
             await callback({"text":"FileContent"})
             FileContent(driver)
             await callback({"text":"SummaryForm"})
@@ -151,12 +160,13 @@ async def UploadPOC(data, callback):
             await callback({"text":"Confirm"})
             Confirm(driver)
             WaitBeforeLastScreen(driver)
-            randfile = 'static/' + id_generator() +'.png'
-            TakeScreenShot(driver, randfile)
+            randfile = id_generator() +'.png'
+            TakeScreenShot(driver, 'static/' + randfile)
             await callback({'text':'Job done.','screen':randfile})
         except Exception as e:
-            randfile = 'static/' + id_generator() +'.png'
-            TakeScreenShot(driver, randfile)
+            traceback.print_exc()
+            randfile = id_generator() +'.png'
+            TakeScreenShot(driver, 'static/' + randfile)
             await callback({'text':'Job Error:'+str(e),'screen':randfile})
             
 async def perform(data, callback):

@@ -20,8 +20,7 @@ class MyDriver:
 def Login(driver, sso):
     #login
     driver.get("https://global-ebusiness.oraclecorp.com/OA_HTML/AppsLogin")
-    #with open('C:\\Users\\yanliu\\Documents\\test2.txt') as f:
-    #    ps = f.read()
+    WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'ssousername')))
     ele_username = driver.find_element_by_name('ssousername')
     ele_username.send_keys(sso['username'])
     driver.find_element_by_name('password').send_keys(sso['password'])

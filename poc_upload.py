@@ -140,7 +140,7 @@ async def UploadPOC(data, callback):
             await callback({"text":'FillUploadSelectionForm'})
             FillUploadSelectionForm(driver, bug_num=data['bug_num'], rel=data['report_rel'])
             await callback({"text":'FillUploadMetaForm'})
-            date_str = date.today().strftime("%b-%d-%y 00:00:00").upper()
+            date_str = date.today().strftime("%b-%d-%Y 00:00:00").upper()
             FillUploadMetaForm(driver, abs_txt=data['abs_txt'], date_value=date_str)
             await callback({"text":"UploadLocationForm"})
             UploadLocationForm(driver, data['filename'])

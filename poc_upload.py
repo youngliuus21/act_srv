@@ -10,6 +10,7 @@ from datetime import date
 import os.path
 import traceback
 import time
+import asyncio
 
 class MyDriver:
     def  __enter__(self):
@@ -125,10 +126,10 @@ def Confirm(driver):
     alert.accept()
     
 def WaitBeforeLastScreen(driver):
-	driver.switch_to.default_content()
-	driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
-	#WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
-    time.sleep(5)
+    driver.switch_to.default_content()
+    driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
+    #WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
+    await asyncio.sleep(5)
 def TakeScreenShot(driver, filename):
     #take screen shot
     driver.save_screenshot(filename)

@@ -74,6 +74,13 @@ def CheckInfo(driver, res_num, report_rel, bug_subject):
     
     return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
     
+def TakeScreenShot(driver, filename):
+    #take screen shot
+    driver.save_screenshot(filename)
+    
+def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
+    return ''.join(random.choice(chars) for _ in range(size))
+
 async def POCBugCheck(data, callback):
     with MyDriver() as driver:
         try:
@@ -83,11 +90,17 @@ async def POCBugCheck(data, callback):
             res_num, report_rel, bug_subject = RetrieveInfo(driver)
             await callback({"text":'CheckInfo'})
             res = CheckInfo(driver, res_num, report_rel, bug_subject)
+
+            randfile = id_generator() +'.png'
+            TakeScreenShot(driver, 'static/' + randfile)
+            await callback({'text':'Job done.','screen':randfile})
+
             res['done'] = True
             await callback(res)
         except Exception as e:
             await callback({'res':False, 'done':True, 'text':'Error:'+str(e)})
             
+
 async def perform(data, callback):
     param = data['parameters']
     param['sso'] = data['sso']

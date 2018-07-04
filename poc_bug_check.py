@@ -69,10 +69,16 @@ def CheckInfo(driver, res_num, report_rel, bug_subject):
     report_rel = 'PeopleSoft PeopleTools ' + m.group(0)
     
     filename = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt)
-    if not os.path.isfile(filename):
-        return {'res':False, 'text':'Cannot find file ' + filename + ', please check and retry.'}
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    #try another way
+    filename = 'p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt)
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
     
-    return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    return {'res':False, 'text':'Cannot find file ' + filename + ', please check and retry.'}
+    
+    
     
 def TakeScreenShot(driver, filename):
     #take screen shot

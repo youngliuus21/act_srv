@@ -127,7 +127,7 @@ def Confirm(driver):
     
 def WaitBeforeLastScreen(driver):
     driver.switch_to.default_content()
-    driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppBody']"))
+    WebDriverWait(driver, 20).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, 'WebAppBody')))
     #WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
     #await asyncio.sleep(5)
 def TakeScreenShot(driver, filename):
@@ -160,8 +160,7 @@ async def UploadPOC(data, callback):
             SummaryForm(driver)
             await callback({"text":"Confirm"})
             Confirm(driver)
-            #WaitBeforeLastScreen(driver)
-            await asyncio.sleep(5)
+            WaitBeforeLastScreen(driver)
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
             await callback({'text':'Job done.','screen':randfile})

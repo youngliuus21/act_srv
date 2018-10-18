@@ -71,8 +71,20 @@ def CheckInfo(driver, res_num, report_rel, bug_subject):
     filename = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt)
     if os.path.isfile(filename):
         return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    filename = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}\\{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_'))
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
     #try another way
     filename = 'p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt)
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt, abs_txt)
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('-','_'), abs_txt)
+    if os.path.isfile(filename):
+        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('_','-'), abs_txt)
     if os.path.isfile(filename):
         return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
     

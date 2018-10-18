@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import TimeoutException
+from aru2bug import aru2bug
 import string
 import random
 from datetime import date
@@ -97,7 +99,6 @@ def UploadLocationForm(driver, filename):
     driver.switch_to.default_content()
     driver.switch_to.frame(driver.find_element_by_css_selector("frame[name='WebAppNavigate']"))
     driver.find_element_by_id('btn_Continue').click()
-    print('click on continue')
 
 def FileContent(driver):
     #file content may wrong
@@ -127,7 +128,10 @@ def Confirm(driver):
     
 def WaitBeforeLastScreen(driver):
     driver.switch_to.default_content()
-    WebDriverWait(driver, 20).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, 'WebAppBody')))
+    try:
+        WebDriverWait(driver, 20).until(EC.frame_to_be_available_and_switch_to_it((By.NAME, 'WebAppBody')))
+    except TimeoutException:
+        print('WaitBeforeLastScreen does not found target frame.')
     #WebDriverWait(driver, 20).until(EC.visibility_of_element_located(By.XPATH, '//a[contains(@href, "process_form?aru=")]'))
     #await asyncio.sleep(5)
 def TakeScreenShot(driver, filename):
@@ -163,7 +167,11 @@ async def UploadPOC(data, callback):
             WaitBeforeLastScreen(driver)
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            await callback({'text':'Job done.','screen':randfile})
+            await callback({'text':'POC uploaded.','screen':randfile})
+            
+            await aru2bug(sso=data['sso'], bug_num=data['bug_num'], callback=callback, driver=driver)
+            await callback({'text':'Job done.'})
+            
         except Exception as e:
             traceback.print_exc()
             randfile = id_generator() +'.png'

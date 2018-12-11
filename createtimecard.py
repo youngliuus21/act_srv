@@ -54,26 +54,26 @@ import random
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-async def CreateTimeCard(data, callback):
+def CreateTimeCard(data, callback):
     with MyDriver() as driver:
         try:
             print('Start Create Time Card')
             Login(driver, sso=data['sso'])
-            await callback({"text":'Login done.'})
+            callback({"text":'Login done.'})
             Nav1(driver)
-            await callback({'text':'Nav done.'})
+            callback({'text':'Nav done.'})
             FillForm1(driver)
-            await callback({'text':'Fill Form done.'})
+            callback({'text':'Fill Form done.'})
             
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            await callback({'text':'Job done.','screen':randfile})
+            callback({'text':'Job done.','screen':randfile})
 
         except Exception as e:
-            await callback({'text':'Error:'+str(e)})
+            callback({'text':'Error:'+str(e)})
 
-async def perform(data, callback):
-    await CreateTimeCard(data, callback)
+def perform(data, callback):
+    CreateTimeCard(data, callback)
     
 if __name__ == "__main__":
     def testCallback(res):

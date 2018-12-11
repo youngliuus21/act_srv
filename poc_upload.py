@@ -141,45 +141,44 @@ def TakeScreenShot(driver, filename):
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-async def UploadPOC(data, callback):
+def UploadPOC(data, callback):
     with MyDriver() as driver:
         try:
-            await callback({'text':'Start Upload POC'})
-            await callback({"text":'Login'})
+            callback({'text':'Start Upload POC'})
+            callback({"text":'Login'})
             Login(driver, data['sso'])
-            await callback({"text":'GoUploadPage'})
+            callback({"text":'GoUploadPage'})
             GoUploadPage(driver)
-            await callback({"text":'FillUploadSelectionForm'})
+            callback({"text":'FillUploadSelectionForm'})
             FillUploadSelectionForm(driver, bug_num=data['bug_num'], rel=data['report_rel'])
-            await callback({"text":'FillUploadMetaForm'})
+            callback({"text":'FillUploadMetaForm'})
             date_str = date.today().strftime("%b-%d-%Y 00:00:00").upper()
             FillUploadMetaForm(driver, abs_txt=data['abs_txt'], date_value=date_str)
-            await callback({"text":"UploadLocationForm"})
-            
+            callback({"text":"UploadLocationForm"})
             filename = data['filename']
             UploadLocationForm(driver, filename)
-            await callback({"text":"FileContent"})
+            callback({"text":"FileContent"})
             FileContent(driver)
-            await callback({"text":"SummaryForm"})
+            callback({"text":"SummaryForm"})
             SummaryForm(driver)
-            await callback({"text":"Confirm"})
+            callback({"text":"Confirm"})
             Confirm(driver)
             WaitBeforeLastScreen(driver)
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            await callback({'text':'POC uploaded.','screen':randfile})
+            callback({'text':'POC uploaded.','screen':randfile})
             
-            await aru2bug(sso=data['sso'], bug_num=data['bug_num'], callback=callback, driver=driver)
-            await callback({'text':'Job done.'})
+            aru2bug(sso=data['sso'], bug_num=data['bug_num'], callback=callback, driver=driver)
+            callback({'text':'Job done.'})
             
         except Exception as e:
             traceback.print_exc()
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            await callback({'text':'Job Error:'+str(e),'screen':randfile})
+            callback({'text':'Job Error:'+str(e),'screen':randfile})
             
-async def perform(data, callback):
+def perform(data, callback):
     param = data['parameters']['bug_info']
     param['bug_num'] = data['parameters']['bug_number']
     param['sso'] = data['sso']
-    await UploadPOC(param, callback)
+    UploadPOC(param, callback)

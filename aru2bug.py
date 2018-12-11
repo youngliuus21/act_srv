@@ -81,17 +81,17 @@ def update_bug(driver, bug_num, sso, txt):
     link = img.find_element_by_xpath('..')
     link.click()       
     
-async def aru2bug_internal(driver, sso, bug_num, callback):
+def aru2bug_internal(driver, sso, bug_num, callback):
     openbug(driver, bug_num, sso)
     aru_link = get_aru_info(driver)
-    #print(aru_link)
-    await callback({"text":"get aru info"})
+    print(aru_link)
+    callback({"text":"get aru info"})
     txt = open_aru(driver, aru_link, sso)
-    #print(txt)
+    print(txt)
     update_bug(driver, bug_num, sso, txt)
-    await callback({"text":"update bug with aru info"})
-async def aru2bug(sso, bug_num, callback, driver):
-    
+    callback({"text":"update bug with aru info"})
+
+def aru2bug(sso, bug_num, callback, driver):
     if driver:
         aru2bug_internal(driver, sso, bug_num, callback)
     else:

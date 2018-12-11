@@ -68,27 +68,20 @@ def CheckInfo(driver, res_num, report_rel, bug_subject):
     m = re.search("(^\d{1}\.\d{2})", report_rel)
     report_rel = 'PeopleSoft PeopleTools ' + m.group(0)
     
-    filename = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt)
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
-    filename = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}\\{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_'))
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
-    #try another way
-    filename = 'p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt)
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
-    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt, abs_txt)
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
-    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('-','_'), abs_txt)
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
-    filename = 'p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('_','-'), abs_txt)
-    if os.path.isfile(filename):
-        return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':filename}
+    names = list()
+    names.append('p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt))
+    names.append('p:\\pt\\poc_idda\\POC\\POC_{}\\{}.zip'.format(res_num, abs_txt))
+    names.append('p:\\pt\\poc_idda\\POC\\POC-{}\\{}\\{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_')))
+    names.append('p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt))
+    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt, abs_txt))
+    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('-','_'), abs_txt))
+    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('_','-'), abs_txt))
     
-    return {'res':False, 'text':'Cannot find file ' + filename + ', please check and retry.'}
+    for fname in names:
+        if os.path.isfile(fname):
+            return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':fname}
+
+    return {'res':False, 'text':'Cannot find the POC file bye these locations ( ' + ','.join(names) + '), please check and retry.'}
     
     
     
@@ -98,28 +91,27 @@ def TakeScreenShot(driver, filename):
     
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
-
-async def POCBugCheck(data, callback):
+ 
+def POCBugCheck(data, callback):
     with MyDriver() as driver:
         try:
-            await callback({"text":'Login'})
+            callback({"text":'Login'})
             Login(driver, data['bug_number'], sso=data['sso'])
-            await callback({"text":'RetrieveInfo'})
+            callback({"text":'RetrieveInfo'})
             res_num, report_rel, bug_subject = RetrieveInfo(driver)
-            await callback({"text":'CheckInfo'})
+            callback({"text":'CheckInfo'})
             res = CheckInfo(driver, res_num, report_rel, bug_subject)
 
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
-            await callback({'text':'Job done.','screen':randfile})
+            callback({'text':'Job done.','screen':randfile})
 
             res['done'] = True
-            await callback(res)
+            callback(res)
         except Exception as e:
-            await callback({'res':False, 'done':True, 'text':'Error:'+str(e)})
+            callback({'res':False, 'done':True, 'text':'Error:'+str(e)})
             
-
-async def perform(data, callback):
+def perform(data, callback):
     param = data['parameters']
     param['sso'] = data['sso']
-    await POCBugCheck(param, callback)
+    POCBugCheck(param, callback)

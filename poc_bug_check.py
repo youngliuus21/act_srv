@@ -5,9 +5,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
 import re
+import os
 import os.path
+import shutil
 import string
 import random
+import subprocess
 
 def id_generator(size=6, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -52,24 +55,26 @@ def RetrieveInfo(driver):
     
     return res_num, report_rel, bug_subject
 
-def CheckInfo(driver, res_num, report_rel, bug_subject):
+def CheckInfo(driver, res_num, report_rel, bug_subject, callback):
     if (not res_num):
         return {'res':False, 'text':'Cannot find resolution ID'}
     
     m = re.search('^((POC-|_)\d{6}(-|_)(\d{2})).*$', bug_subject)
     if (not m):
-        return {'res':False, 'text':'The bug subject should begin with: POC-' + res_num + '-XX... Please update and retry.'}
+        return {'res':False, 'text':'The bug subject should begin with: POC-' + res_num + '-0X Please update and retry.'}
     abs_txt = m.group(1)
     if (res_num not in bug_subject):
-        return {'res':False, 'text':'The bug subject should begin with: POC-' + res_num + '-XX... Please update and retry.'}
+        return {'res':False, 'text':'The bug subject should begin with: POC-' + res_num + '-0X Please update and retry.'}
     if (not report_rel):
         return {'res':False, 'text':'Reported Release is empty, please fill and retry.'}
     
     m = re.search("(^\d{1}\.\d{2})", report_rel)
     report_rel = 'PeopleSoft PeopleTools ' + m.group(0)
     
+    tgt_dir = 'p:\\pt\\poc_idda\\POC\\POC-{}'.format(res_num)
+    tgt_name = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt)
+    
     names = list()
-    names.append('p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt))
     names.append('p:\\pt\\poc_idda\\POC\\POC_{}\\{}.zip'.format(res_num, abs_txt))
     names.append('p:\\pt\\poc_idda\\POC\\POC-{}\\{}\\{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_')))
     names.append('p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt))
@@ -77,13 +82,28 @@ def CheckInfo(driver, res_num, report_rel, bug_subject):
     names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('-','_'), abs_txt))
     names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('_','-'), abs_txt))
     
-    for fname in names:
-        if os.path.isfile(fname):
-            return {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':fname}
-
+    res = {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':tgt_name}
+    if os.path.isfile(tgt_name):
+        return res
+    else:
+        if not os.path.exists(tgt_dir):
+            os.makedirs(tgt_dir)
+            #print('>>> mkdirs {}'.format(tgt_dir))
+        for fname in names:
+            if os.path.isfile(fname):
+                shutil.move(fname, tgt_name)
+                callback({'text':'zip file moved from {} to {}'.format(fname, tgt_name)})
+                return res
+    
+    names.append(tgt_name)
     return {'res':False, 'text':'Cannot find the POC file bye these locations ( ' + ','.join(names) + '), please check and retry.'}
     
-    
+def MalwareScan(filename, cb):
+    resultfile = filename.replace('.zip', '.scanresults')
+    cmd = 'Y:\\pt_admin\\PTAdm\\psmscan.py -w d:\\tmp -s {} -l {}'.format(filename, resultfile)
+    cb({'text':cmd})
+    res = subprocess.call(cmd, shell=True)
+    cb({'text':'malware scan result:'+str(res)})
     
 def TakeScreenShot(driver, filename):
     #take screen shot
@@ -100,8 +120,10 @@ def POCBugCheck(data, callback):
             callback({"text":'RetrieveInfo'})
             res_num, report_rel, bug_subject = RetrieveInfo(driver)
             callback({"text":'CheckInfo'})
-            res = CheckInfo(driver, res_num, report_rel, bug_subject)
-
+            res = CheckInfo(driver, res_num, report_rel, bug_subject, callback)
+            
+            MalwareScan(res['filename'], callback)
+            
             randfile = id_generator() +'.png'
             TakeScreenShot(driver, 'static/' + randfile)
             callback({'text':'Job done.','screen':randfile})

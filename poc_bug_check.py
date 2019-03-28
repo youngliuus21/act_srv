@@ -101,6 +101,7 @@ def CheckInfo(driver, res_num, report_rel, bug_subject, callback):
 def MalwareScan(filename, cb):
     resultfile = filename.replace('.zip', '.scanresults')
     cmd = 'Y:\\pt_admin\\PTAdm\\psmscan.py -w d:\\tmp -s {} -l {}'.format(filename, resultfile)
+    cb({'text':'begin malware scan...'})
     cb({'text':cmd})
     res = subprocess.call(cmd, shell=True)
     cb({'text':'malware scan result:'+str(res)})
@@ -121,7 +122,11 @@ def POCBugCheck(data, callback):
             res_num, report_rel, bug_subject = RetrieveInfo(driver)
             callback({"text":'CheckInfo'})
             res = CheckInfo(driver, res_num, report_rel, bug_subject, callback)
-            
+            if (res['res'] == False):
+                res['done'] = True;
+                callback(res);
+                return
+                
             MalwareScan(res['filename'], callback)
             
             randfile = id_generator() +'.png'

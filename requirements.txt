@@ -1,4 +1,4 @@
-aiohttp==3.3.1
+aiohttp==3.5.4
 async-timeout==3.0.0
 python-engineio==2.1.1
 python-socketio==1.9.0

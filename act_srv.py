@@ -5,6 +5,8 @@ import asyncio
 from functools import partial
 from concurrent.futures import ThreadPoolExecutor
 
+import my_log
+
 sio = socketio.AsyncServer()
 app = web.Application()
 sio.attach(app)
@@ -54,4 +56,6 @@ app.router.add_static('/static', 'static')
 app.router.add_get('/', index)
 
 if __name__ == '__main__':
+    my_log.debug('server started on 19999...')
     web.run_app(app, port=19999)
+    

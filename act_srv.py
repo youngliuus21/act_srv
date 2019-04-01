@@ -18,13 +18,13 @@ async def index(request):
         
 @sio.on('connect', namespace='/action')
 def connect(sid, environ):
-    print("connect ", sid)
+    my_log.debug("connect " + sid)
 
 act_executor = ThreadPoolExecutor()
 
 @sio.on('dialog.act', namespace='/action')
 async def message(sid, data):
-    print("action name: ", data['name'], sid)
+    my_log.debug("action name: " + data['name'] + " " + sid)
        
     def callback(res):
         app.loop.create_task(sio.emit('act.status', data=res, room=sid, namespace='/action'))
@@ -39,7 +39,7 @@ async def message(sid, data):
         callback({'result':'ok', 'close':True})
     def action1():
         module.perform(data, callback)
-        print('schedule close socket')
+        my_log.debug('schedule close socket')
         app.loop.call_later(30, closesocket)
         
     app.loop.run_in_executor(act_executor, action1)
@@ -50,7 +50,7 @@ async def message(sid, data):
 
 @sio.on('disconnect', namespace='/action')
 def disconnect(sid):
-    print('disconnect ', sid)
+    my_log.debug('disconnect ' + sid)
 
 app.router.add_static('/static', 'static')
 app.router.add_get('/', index)

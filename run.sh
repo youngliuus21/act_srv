@@ -1,2 +1,2 @@
-docker run --name act_srv  -p 9999:19999 -d act_srv:0.1
+docker run --name action_server -p 9999:19999 -v /scratch/log:/log --net mynet -d act:0.1
 

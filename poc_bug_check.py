@@ -21,7 +21,7 @@ class MyDriver:
         ff_profile.set_preference("network.proxy.type", 2);
         ff_profile.set_preference("network.proxy.autoconfig_url", "http://wpad/wpad.dat")
 
-        driver = webdriver.Remote("http://slc12gzh.us.oracle.com:8444", 
+        driver = webdriver.Remote(os.environ['SELENIUM_SERVER'], 
                           browser_profile=ff_profile,
                           desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
         driver.implicitly_wait(20) # seconds

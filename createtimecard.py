@@ -1,8 +1,10 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import my_log
 
 class MyDriver:
     def  __enter__(self):
@@ -10,7 +12,9 @@ class MyDriver:
         ff_profile.set_preference("network.proxy.type", 2);
         ff_profile.set_preference("network.proxy.autoconfig_url", "http://wpad/wpad.dat")
 
-        driver = webdriver.Remote("http://slc12gzh.us.oracle.com:8444", 
+        my_log.debug("selenium server:" + os.environ['SELENIUM_SERVER'])
+
+        driver = webdriver.Remote(os.environ['SELENIUM_SERVER'],
                           browser_profile=ff_profile,
                           desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
 

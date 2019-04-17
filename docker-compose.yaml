@@ -1,0 +1,58 @@
+    version: "3"
+    services:
+        selenium-hub:
+            image: selenium/hub:3.141.59-mercury
+            container_name: selenium-hub
+            ports:
+              - "4444:4444"
+            networks:
+              - mynet
+        firefox:
+            image: selenium/node-firefox-debug
+            container_name: firefox-debug
+            volumes:
+              - /dev/shm:/dev/shm
+              - /mount/dfs:/dfs
+            ports:
+              - "5900:5900"
+            depends_on:
+              - selenium-hub
+            environment:
+              - HUB_HOST=selenium-hub
+              - HUB_PORT=4444
+            networks:
+              - mynet
+        chatbot:
+            build:
+                ../chb_server
+            image: chb:0.1
+            container_name: chatbot
+            ports:
+              - "80:18888"
+            environment:
+              - https_proxy=http://www-proxy-brmdc.us.oracle.com:80
+              - http_proxy=http://www-proxy-brmdc.us.oracle.com:80
+              - NO_PROXY=action_server
+              - no_proxy=action_server
+              - ACTION_SERVER=http://action_server:19999
+            networks:
+              - mynet
+        action_server:
+            build:
+                .
+            image: act:0.1
+            container_name: action_server
+            ports:
+              - "9999:19999"
+            volumes:
+              - /scratch/log:/log
+              - /mount/dfs:/dfs
+              - /scratch/clearcase_view:/cc_view
+            environment:
+              - no_proxy=selenium-hub
+              - SELENIUM_SERVER=http://selenium-hub:4444/wd/hub
+            networks:
+              - mynet
+    networks:
+      mynet:
+        driver: bridge

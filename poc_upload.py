@@ -20,20 +20,21 @@ class MyDriver:
         ff_profile.set_preference("network.proxy.type", 2);
         ff_profile.set_preference("network.proxy.autoconfig_url", "http://wpad/wpad.dat")
 
-        driver = webdriver.Remote("http://slc12gzh.us.oracle.com:8444", 
+        driver = webdriver.Remote(os.environ['SELENIUM_SERVER'],
                           browser_profile=ff_profile,
-                          desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
+                          desired_capabilities={
+                              'browserName': 'firefox',
+                              'javascriptEnabled': True
+                          })
         driver._is_remote = False #workaround, see https://stackoverflow.com/questions/42754877/cant-upload-file-using-selenium-with-python-post-post-session-b90ee4c1-ef51-4/42770761#42770761
         driver.implicitly_wait(20) # seconds
         self.driver = driver
         return self.driver
     def __exit__(self, type, value, traceback):
-        self.driver.close()
+        self.driver.quit()
         
 def Login(driver, sso):
     #login
-    with open('C:\\Users\\yanliu\\Documents\\test2.txt') as f:
-        ps = f.read()
     driver.get("http://aru.us.oracle.com:8080/ARU/Login/get_form?navigation=button")
     
     WebDriverWait(driver, 10).until(EC.visibility_of_element_located((By.NAME, 'ssousername')))

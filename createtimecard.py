@@ -22,7 +22,7 @@ class MyDriver:
         self.driver = driver
         return self.driver
     def __exit__(self, type, value, traceback):
-        self.driver.close()
+        self.driver.quit()
 
 def Login(driver, sso):
     #login

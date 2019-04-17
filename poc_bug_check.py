@@ -23,12 +23,15 @@ class MyDriver:
 
         driver = webdriver.Remote(os.environ['SELENIUM_SERVER'], 
                           browser_profile=ff_profile,
-                          desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
+                          desired_capabilities={
+                              'browserName': 'firefox',
+                              'javascriptEnabled': True
+                          })
         driver.implicitly_wait(20) # seconds
         self.driver = driver
         return self.driver
     def __exit__(self, type, value, traceback):
-        self.driver.close()
+        self.driver.quit()
         
 def Login(driver, bug_num, sso):
     #login
@@ -71,16 +74,16 @@ def CheckInfo(driver, res_num, report_rel, bug_subject, callback):
     m = re.search("(^\d{1}\.\d{2})", report_rel)
     report_rel = 'PeopleSoft PeopleTools ' + m.group(0)
     
-    tgt_dir = 'p:\\pt\\poc_idda\\POC\\POC-{}'.format(res_num)
-    tgt_name = 'p:\\pt\\poc_idda\\POC\\POC-{}\\{}.zip'.format(res_num, abs_txt)
+    tgt_dir = '/dfs/pt/poc_idda/POC/POC-{}'.format(res_num)
+    tgt_name = '/dfs/pt/poc_idda/POC/POC-{}/{}.zip'.format(res_num, abs_txt)
     
     names = list()
-    names.append('p:\\pt\\poc_idda\\POC\\POC_{}\\{}.zip'.format(res_num, abs_txt))
-    names.append('p:\\pt\\poc_idda\\POC\\POC-{}\\{}\\{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_')))
-    names.append('p:\\pt\\poc_idda\\POC\\{}\\{}.zip'.format(abs_txt, abs_txt))
-    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt, abs_txt))
-    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('-','_'), abs_txt))
-    names.append('p:\\pt\\poc_idda\\POC\\{}.zip'.format(abs_txt.replace('_','-'), abs_txt))
+    names.append('/dfs/pt/poc_idda/POC/POC_{}/{}.zip'.format(res_num, abs_txt))
+    names.append('/dfs/pt/poc_idda/POC/POC-{}/{}/{}.zip'.format(res_num, abs_txt, abs_txt.replace('-','_')))
+    names.append('/dfs/pt/poc_idda/POC/{}/{}.zip'.format(abs_txt, abs_txt))
+    names.append('/dfs/pt/poc_idda/POC/{}.zip'.format(abs_txt, abs_txt))
+    names.append('/dfs/pt/poc_idda/POC/{}.zip'.format(abs_txt.replace('-','_'), abs_txt))
+    names.append('/dfs/pt/poc_idda/POC/{}.zip'.format(abs_txt.replace('_','-'), abs_txt))
     
     res = {'res': True, 'res_num':res_num, 'abs_txt':abs_txt, 'report_rel':report_rel, 'bug_subject':bug_subject, 'filename':tgt_name}
     if os.path.isfile(tgt_name):
@@ -100,7 +103,7 @@ def CheckInfo(driver, res_num, report_rel, bug_subject, callback):
     
 def MalwareScan(filename, cb):
     resultfile = filename.replace('.zip', '.scanresults')
-    cmd = 'Y:\\pt_admin\\PTAdm\\psmscan.py -w d:\\tmp -s {} -l {}'.format(filename, resultfile)
+    cmd = 'python3 /cc_view/pt_admin/PTAdm/psmscan.py -w /tmp -s {} -l {}'.format(filename, resultfile)
     cb({'text':'begin malware scan...'})
     cb({'text':cmd})
     res = subprocess.call(cmd, shell=True)

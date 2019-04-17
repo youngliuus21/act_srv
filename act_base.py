@@ -18,7 +18,7 @@ class MyDriver:
         ff_profile.set_preference("network.proxy.type", 2);
         ff_profile.set_preference("network.proxy.autoconfig_url", "http://wpad/wpad.dat")
 
-        driver = webdriver.Remote("http://slc12gzh.us.oracle.com:8444", 
+        driver = webdriver.Remote(os.environ['SELENIUM_SERVER'], 
                           browser_profile=ff_profile,
                           desired_capabilities=webdriver.DesiredCapabilities.FIREFOX.copy())
         driver._is_remote = False #workaround, see https://stackoverflow.com/questions/42754877/cant-upload-file-using-selenium-with-python-post-post-session-b90ee4c1-ef51-4/42770761#42770761
@@ -26,7 +26,7 @@ class MyDriver:
         self.driver = driver
         return self.driver
     def __exit__(self, type, value, traceback):
-        self.driver.close()
+        self.driver.quit()
         
 def find_img_by_src(driver, src):
     images = driver.find_elements_by_tag_name('img')
